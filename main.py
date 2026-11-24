@@ -20,9 +20,15 @@ def main():
     # On-topic guard (judge criterion 1): the line must name a small good
     # thing that happened today, concretely (this morning, a mango, a note).
     assert "this morning" in LINE and "mango" in LINE, "line must anchor today with a concrete detail"
+    # Byte guard: the entry is pure ASCII, so its byte size equals its
+    # character count — the tie-break favours smaller bytes, and no
+    # multi-byte character may creep in unnoticed.
+    assert len(LINE.encode("utf-8")) == len(LINE), "entry must be ASCII"
     os.makedirs("/output", exist_ok=True)
-    with open("/output/entry.txt", "w", encoding="utf-8") as f:
-        f.write(LINE)
+    # Write bytes, not text: no newline translation or encoding surprise
+    # on any platform — what the grader reads is exactly LINE.
+    with open("/output/entry.txt", "wb") as f:
+        f.write(LINE.encode("utf-8"))
     # Round-trip guard: what the grader reads back must be exactly the line.
     with open("/output/entry.txt", encoding="utf-8") as f:
         assert f.read() == LINE, "entry.txt round-trip mismatch"
